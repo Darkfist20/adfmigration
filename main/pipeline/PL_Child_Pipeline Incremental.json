@@ -26,7 +26,17 @@
 					},
 					"dataset": {
 						"referenceName": "SqlServerTable1",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"schemaName": {
+								"value": "@pipeline().parameters.TableSchema\n",
+								"type": "Expression"
+							},
+							"tableName": {
+								"value": "@pipeline().parameters.TableName",
+								"type": "Expression"
+							}
+						}
 					}
 				}
 			},
@@ -64,6 +74,10 @@
 							"typeProperties": {
 								"source": {
 									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@concat(\n    'SELECT * FROM ',\n    pipeline().parameters.TableSchema, '.', pipeline().parameters.TableName,\n    if(\n        equals(pipeline().parameters.LastLoadValue, null),\n        '',\n        concat(\n            ' WHERE ', pipeline().parameters.WatermarkColumn,\n            ' > ''', pipeline().parameters.LastLoadValue, ''''\n        )\n    )\n)\n",
+										"type": "Expression"
+									},
 									"queryTimeout": "02:00:00",
 									"partitionOption": "None"
 								},
@@ -92,6 +106,10 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"schemaName": {
+											"value": "@pipeline().parameters.TableSchema",
+											"type": "Expression"
+										},
+										"tableName": {
 											"value": "@pipeline().parameters.TableSchema",
 											"type": "Expression"
 										}
