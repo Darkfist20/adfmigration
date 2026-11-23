@@ -30,7 +30,7 @@
 				"typeProperties": {
 					"ifTrueActivities": [
 						{
-							"name": "Copy data1",
+							"name": "COPYSQL_FULL_INCTLOAD_TABLES",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
@@ -42,7 +42,37 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
 								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "SqlServerTable1",
+									"type": "DatasetReference"
+								}
+							]
+						},
+						{
+							"name": "EXEC_UPDATE_WATERMARK",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "COPYSQL_FULL_INCTLOAD_TABLES",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"waitOnCompletion": true
 							}
 						}
 					]
@@ -51,20 +81,16 @@
 		],
 		"parameters": {
 			"TableSchema": {
-				"type": "string",
-				"defaultValue": "@item().TableSchema"
+				"type": "string"
 			},
 			"TableName": {
-				"type": "string",
-				"defaultValue": "@item().TableName"
+				"type": "string"
 			},
 			"WatermarkColumn": {
-				"type": "string",
-				"defaultValue": "@item().WatermarkColumn"
+				"type": "string"
 			},
 			"LastloadValue": {
-				"type": "string",
-				"defaultValue": "@item().LastLoadValue"
+				"type": "string"
 			}
 		},
 		"annotations": []
